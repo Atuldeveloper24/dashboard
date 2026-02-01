@@ -5,7 +5,7 @@ import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import { Loader2, RefreshCw, Layers, Users, ChevronLeft, Plus, LogOut, ShieldCheck, User as UserIcon } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://dash-etica-production.up.railway.app';
 
 function App() {
   const [loading, setLoading] = useState(false);

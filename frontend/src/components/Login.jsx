@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Layers, Lock, User, Loader2, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://dash-etica-production.up.railway.app';
 
 const Login = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
