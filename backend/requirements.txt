@@ -6,4 +6,5 @@ pypdf
 pillow
 python-dotenv
 sqlalchemy
-
+python-jose[cryptography]
+passlib[bcrypt]
