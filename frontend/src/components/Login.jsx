@@ -113,6 +113,22 @@ const Login = ({ onLoginSuccess }) => {
                                 <span>Sign Into Dashboard</span>
                             )}
                         </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setUsername('admin');
+                                setPassword('admin123');
+                                // Give it a tiny delay so the state updates
+                                setTimeout(() => {
+                                    document.querySelector('form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                                }, 100);
+                            }}
+                            className="w-full bg-white border-2 border-slate-200 hover:border-primary-500 hover:text-primary-600 text-slate-600 font-bold py-4 rounded-2xl transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2"
+                        >
+                            <Layers className="w-4 h-4 text-primary-500" />
+                            <span>Try Demo Dashboard</span>
+                        </button>
                     </form>
 
                     <div className="mt-8 text-center text-slate-400 text-xs font-medium border-t border-slate-50 pt-6">

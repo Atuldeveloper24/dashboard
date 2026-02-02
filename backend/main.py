@@ -359,7 +359,14 @@ def seed_data():
     db.commit()
     db.close()
 
+@app.on_event("startup")
+async def startup_event():
+    print("Railway: Running startup sequence...")
+    seed_data()
+    print("Railway: Database seed successful.")
+
 if __name__ == "__main__":
     import uvicorn
-    seed_data()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    print(f"Railway: Starting server on port {port}")
+    uvicorn.run(app, host="0.0.0.0", port=port)
