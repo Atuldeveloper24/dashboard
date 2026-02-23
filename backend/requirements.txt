@@ -1,10 +1,15 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-multipart
 google-generativeai
+openai
+anthropic
 pypdf
 pillow
 python-dotenv
 sqlalchemy
 python-jose[cryptography]
 passlib[bcrypt]
+pydantic
+pydantic-settings
+axios

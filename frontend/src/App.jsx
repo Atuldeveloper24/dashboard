@@ -3,7 +3,8 @@ import axios from 'axios';
 import UploadBox from './components/UploadBox';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
-import { Loader2, RefreshCw, Layers, Users, ChevronLeft, Plus, LogOut, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { Loader2, RefreshCw, Layers, Users, ChevronLeft, Plus, LogOut, ShieldCheck, User as UserIcon, Bot, ChevronRight } from 'lucide-react';
+import WealthSyncWorkspace from './components/ClientChat';
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:8000'
@@ -18,6 +19,7 @@ function App() {
   const [isSaving, setIsSaving] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
+  const [showAgent, setShowAgent] = useState(false);
 
   // Auth State
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -61,13 +63,18 @@ function App() {
     setProfiles([]);
   };
 
-  const handleFilesAnalysis = async (files) => {
+  const handleFilesAnalysis = async (files = [], transcript = null) => {
     setLoading(true);
     setError(null);
     setShowUploader(false);
 
     const formData = new FormData();
-    files.forEach((file) => formData.append('files', file));
+    if (files.length > 0) {
+      files.forEach((file) => formData.append('files', file));
+    }
+    if (transcript) {
+      formData.append('transcript', transcript);
+    }
 
     const url = currentProfileId
       ? `${API_BASE}/analyze?profile_id=${currentProfileId}`
@@ -79,7 +86,16 @@ function App() {
       });
       setAnalysisData(response.data);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Analysis failed. Please try again.');
+      const detail = err.response?.data?.detail;
+      if (typeof detail === 'string') {
+        setError(detail);
+      } else if (Array.isArray(detail)) {
+        setError(detail.map(e => e.msg).join(', '));
+      } else if (typeof detail === 'object' && detail !== null) {
+        setError(JSON.stringify(detail));
+      } else {
+        setError('Analysis failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -131,7 +147,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex overflow-hidden">
+    <div className="h-screen bg-slate-50 flex overflow-hidden">
       {/* Sidebar for History */}
       <aside className={`bg-white border-r border-slate-200 transition-all duration-300 z-50 overflow-hidden ${showHistory ? 'w-80' : 'w-0'}`}>
         <div className="w-80 p-6 flex flex-col h-full">
@@ -174,8 +190,8 @@ function App() {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto relative">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <nav className="bg-white border-b border-slate-200 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -205,12 +221,21 @@ function App() {
               </div>
 
               {analysisData && (
-                <button
-                  onClick={reset}
-                  className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-primary-600 transition-colors"
-                >
-                  <RefreshCw className="w-4 h-4" /> New Analysis
-                </button>
+                <div className="flex items-center gap-2 border-l border-slate-200 pl-6">
+                  <button
+                    onClick={() => setShowAgent(!showAgent)}
+                    className={`p-2 rounded-lg transition-all ${showAgent ? 'bg-indigo-50 text-indigo-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                    title="Agent Manager"
+                  >
+                    <Bot className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={reset}
+                    className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-primary-600 transition-colors"
+                  >
+                    <RefreshCw className="w-4 h-4" /> New Analysis
+                  </button>
+                </div>
               )}
 
               <button
@@ -224,7 +249,7 @@ function App() {
           </div>
         </nav>
 
-        <main className="py-12 px-6 flex-1">
+        <main className="flex-1 overflow-y-auto py-12 px-6">
           {(!analysisData || showUploader) ? (
             <div className="space-y-12">
               <div className="text-center space-y-4">
@@ -258,6 +283,7 @@ function App() {
               onSave={handleSaveProfile}
               onAddMore={() => setShowUploader(true)}
               isSaving={isSaving}
+              profileId={currentProfileId}
             />
           )}
 
@@ -278,6 +304,20 @@ function App() {
           </div>
         </footer>
       </div>
+
+      {/* Sidebar for Agent Manager */}
+      <aside className={`bg-white border-l border-slate-200 transition-all duration-300 z-50 overflow-hidden h-screen ${showAgent ? 'w-[480px]' : 'w-0'}`}>
+        <div className="w-[480px] h-full flex flex-col">
+          {analysisData && (
+            <WealthSyncWorkspace
+              profileId={currentProfileId}
+              analysisData={analysisData}
+              clientName={analysisData.client_profile?.name || 'Client'}
+              onClose={() => setShowAgent(false)}
+            />
+          )}
+        </div>
+      </aside>
     </div>
   );
 }
